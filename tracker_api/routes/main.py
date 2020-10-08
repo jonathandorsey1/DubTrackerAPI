@@ -1,16 +1,14 @@
 from flask import Blueprint, request
 
-from flask_qa.extensions import db
-from flask_qa.models import GameEntry
+from tracker_api.extensions import db
+from tracker_api.models import Player, PlayerGame, Game
 
 main = Blueprint('main', __name__)
 
 @main.route('/')
 def index():
-    questions = Question.query.filter(Question.answer != None).all()
+    wins = PlayerGame.query.filter_by(placement=1).group_by(id_game).all()
 
-    context = {
-        'questions' : questions
-    }
-
-    return render_template('home.html', **context)
+    return {
+        'num wins': len(wins)
+        }
