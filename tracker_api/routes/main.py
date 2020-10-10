@@ -17,6 +17,10 @@ def index():
 @main.route('/wins/<username>', methods=['GET'])
 def player_wins(username):
     player = Player.query.filter_by(username=username).first()
+    if player is None:
+        return {
+            'status': "Player not found!"
+        }
     team_players = player.teams
     teams = [team_player.team for team_player in team_players]
     wins = 0
@@ -24,6 +28,7 @@ def player_wins(username):
         wins += len(TeamGame.query.filter_by(id_team=team.id, placement=1).all())
 
     return {
+        'status': 'Player found!',
         'num wins': wins
         }
 
