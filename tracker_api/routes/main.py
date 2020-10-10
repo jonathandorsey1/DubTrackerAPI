@@ -14,6 +14,19 @@ def index():
         'num wins': len(wins)
         }
 
+@main.route('/wins/<username>', methods=['GET'])
+def player_wins(username):
+    player = Player.query.filter_by(username=username).first()
+    team_players = player.teams
+    teams = [team_player.team for team_player in team_players]
+    wins = 0
+    for team in teams:
+        wins += len(TeamGame.query.filter_by(id_team=team.id, placement=1).all())
+
+    return {
+        'num wins': wins
+        }
+
 @main.route('/teams', methods=['GET'])
 def teams():
     teams = Team.query.all()
