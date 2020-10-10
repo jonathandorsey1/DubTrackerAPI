@@ -2,6 +2,7 @@ from flask import Blueprint, request
 
 from tracker_api.extensions import db
 from tracker_api.models import *
+from sqlalchemy.orm import aliased
 
 main = Blueprint('main', __name__)
 
@@ -11,6 +12,14 @@ def index():
 
     return {
         'num wins': len(wins)
+        }
+
+@main.route('/teams', methods=['GET'])
+def teams():
+    teams = Team.query.all()
+
+    return {
+        'num teams': len(teams)
         }
 
 @main.route('/track', methods=['POST'])
@@ -53,12 +62,19 @@ def track():
         players = get_players(_team['members'], game)
         # check if team record already exists
         team = get_team(players)
-        team_game = TeamGame(
-            team=team,
-            game=game,
-            placement=_team['placement']
-        )
-        db.session.add(team_game)
+
+        team_game = TeamGame.query.filter_by(
+            id_team=team.id, 
+            id_game=game.id).first()
+        if team_game is None:
+            team_game = TeamGame(
+                id_team=team.id, 
+                id_game=game.id,
+                placement=_team['placement']
+            )
+            db.session.add(team_game)
+        else:
+            pass
     db.session.commit()
 
     return 'Game tracked!'
@@ -107,12 +123,18 @@ def get_players(team, game):
 
 def get_team(players):
     # TODO: check if the following queries work
-    query = db.session.query(TeamPlayer).filter_by(id_player=players[0].id)
+    q = db.session.query(TeamPlayer).filter_by(id_player=players[0].id)
 
-    for player in players[1:]:
-        query = db.session.query(TeamPlayer).filter_by(id_player=player.id).join(query.subquery())
+    if len(players) > 1:
+        subq = q.subquery()
+        for player in players[1:]:
+            q = db.session.query(TeamPlayer).filter( \
+                (TeamPlayer.id_player==player.id) & \
+                (TeamPlayer.id_team==subq.c.id_team))
+            subq = q.subquery()
     
-    record = query.first()
+    print(q.all())
+    record = q.first()
     team = None
     if record is None:
         # make new team
@@ -125,6 +147,9 @@ def get_team(players):
             ))
         db.session.commit()
     else:
-        team = Team.query.filter(id=record.id_team)
+        team = Team.query.filter_by(id=record.id_team).first()
     
+    for player in team.players:
+        print(player.player.username)
+    print('team id:',team.id)
     return team
