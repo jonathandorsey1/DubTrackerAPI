@@ -166,7 +166,7 @@ def get_team(players):
     for player in team.players:
         print(player.player.username)
     print('team id:',team.id)
-    return team
+    return team 
 
 def make_team(players):
     team = Team()
