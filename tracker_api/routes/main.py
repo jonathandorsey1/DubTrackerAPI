@@ -143,8 +143,6 @@ def get_team(players):
     # TODO: check if the following queries work
     q = db.session.query(TeamPlayer).filter_by(id_player=players[0].id)
 
-    # team_players = [db.session.query(TeamPlayer.filter_by(id_player=player.id)) for player in players]
-
     if len(players) > 1:
         subq = q.subquery()
         for player in players[1:]:
@@ -166,10 +164,15 @@ def get_team(players):
     for player in team.players:
         print(player.player.username)
     print('team id:',team.id)
-    return team 
+    return team
 
 def make_team(players):
     team = Team()
     db.session.add(team)
     for player in players:
-        db.session.add(TeamPlayer(j
+        db.session.add(TeamPlayer(
+            team=team,
+            player=player
+        ))
+    db.session.commit()
+    return team
