@@ -2,7 +2,6 @@ from flask import Blueprint, request
 
 from tracker_api.extensions import db
 from tracker_api.models import *
-from sqlalchemy.orm import aliased
 
 main = Blueprint('main', __name__)
 
