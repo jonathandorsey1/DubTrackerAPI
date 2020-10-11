@@ -8,7 +8,7 @@ class Player(db.Model):
     teams = db.relationship('TeamPlayer', backref='player', lazy=True)
 
 class Game(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.BigInteger, primary_key=True)
     dttm = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     # TODO: implement grabbing gamemode squad size
     gamemode = db.Column(db.Integer, nullable=False)
@@ -23,7 +23,7 @@ class Team(db.Model):
 class PlayerGame(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     id_player = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=False)
-    id_game = db.Column(db.Integer, db.ForeignKey('game.id'), nullable=False)
+    id_game = db.Column(db.BigInteger, db.ForeignKey('game.id'), nullable=False)
     kills = db.Column(db.Integer, nullable=False)
     damage = db.Column(db.Integer, nullable=False)
     deaths = db.Column(db.Integer, nullable=False)
@@ -31,7 +31,7 @@ class PlayerGame(db.Model):
 class TeamGame(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     id_team = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
-    id_game = db.Column(db.Integer, db.ForeignKey('game.id'), nullable=False)
+    id_game = db.Column(db.BigInteger, db.ForeignKey('game.id'), nullable=False)
     placement = db.Column(db.Integer, nullable=False)
 
 class TeamPlayer(db.Model):
