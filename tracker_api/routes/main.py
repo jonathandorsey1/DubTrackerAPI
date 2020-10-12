@@ -34,6 +34,8 @@ def player_wins(username):
 
 @main.route('/wins/gamemode/<int:id>', methods=['GET'])
 def gamemode_wins(id):
+    if id not in [1, 2, 3, 4]:
+        id = -1
     games = Game.query.filter_by(gamemode=id).all()
     if games is None:
         return {
