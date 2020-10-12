@@ -34,7 +34,7 @@ def player_wins(username):
 
 @main.route('/wins/gamemode/<int:id>', methods=['GET'])
 def gamemode_wins(id):
-    games = Game.query.filter_by(gamemode=id)
+    games = Game.query.filter_by(gamemode=id).all()
     if games is None:
         return {
             'status': "Gamemode not found!"
