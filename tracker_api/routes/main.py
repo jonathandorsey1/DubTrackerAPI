@@ -32,6 +32,20 @@ def player_wins(username):
         'num wins': wins
         }
 
+@main.route('/wins/gamemode/<int:id>', methods=['GET'])
+def gamemode_wins(id):
+    games = TeamGame.query.filter_by(placement=1, game.gamemode=id)
+    if games is None:
+        return {
+            'status': "Gamemode not found!"
+        }
+    wins = len(games)
+
+    return {
+        'status': 'Gamemode found!',
+        'num wins': wins
+        }
+
 @main.route('/teams', methods=['GET'])
 def teams():
     teams = Team.query.all()
