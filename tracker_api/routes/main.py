@@ -3,7 +3,6 @@ from flask import Blueprint, request
 from tracker_api.extensions import db
 from tracker_api.models import *
 from sqlalchemy.orm import aliased
-from sqlalchemy import _or
 
 main = Blueprint('main', __name__)
 
