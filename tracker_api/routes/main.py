@@ -30,7 +30,7 @@ def player_wins(username):
         q = db.session.query(TeamGame).filter( \
                 (TeamGame.id_team==team.id_team) & \
                 (TeamGame.placement==1) & \
-                (TeamGame.game_id.in(subq)) \
+                (TeamGame.game_id.in_(subq)) \
                 )
         wins += len(q.all())
         # wins += len(TeamGame.query.filter_by(id_team=team.id, placement=1).all())
