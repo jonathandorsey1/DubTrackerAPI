@@ -3,6 +3,7 @@ from flask import Blueprint, request
 from tracker_api.extensions import db
 from tracker_api.models import *
 from sqlalchemy.orm import aliased
+from sqlalchemy import _or
 
 main = Blueprint('main', __name__)
 
@@ -24,8 +25,16 @@ def player_wins(username):
     team_players = player.teams
     teams = [team_player.team for team_player in team_players]
     wins = 0
+    subq = db.session.query(Game).filter_by(Game.gamemode.in_([1,2,3,4])).subquery()
     for team in teams:
-        wins += len(TeamGame.query.filter_by(id_team=team.id, placement=1).all())
+        q = db.session.query(TeamGame).filter( \
+                (TeamGame.id_team==team.id_team) & \
+                (TeamGame.placement==1) & \
+                (TeamGame.game_id.in(subq)) \
+                )
+        wins += len(q.all())
+        # wins += len(TeamGame.query.filter_by(id_team=team.id, placement=1).all())
+
 
     return {
         'status': 'Player found!',
