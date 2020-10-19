@@ -171,7 +171,7 @@ def get_team(players):
         subq = q.subquery()
         for player in players[1:]:
             subq2 = db.session.query(TeamPlayer).filter_by(id_player=players[1].id).subquery()
-            q = db.session.query(subq2).filter_by(subq2.c.id_team==subq.c.id_team)
+            q = db.session.query(subq2).filter(subq2.c.id_team==subq.c.id_team)
             # q = db.session.query(TeamPlayer).filter( \
             #     (TeamPlayer.id_player==player.id) & \
             #     (TeamPlayer.id_team==subq.c.id_team))
