@@ -170,9 +170,11 @@ def get_team(players):
     if len(players) > 1:
         subq = q.subquery()
         for player in players[1:]:
-            q = db.session.query(TeamPlayer).filter( \
-                (TeamPlayer.id_player==player.id) & \
-                (TeamPlayer.id_team==subq.c.id_team))
+            subq2 = db.session.query(TeamPlayer).filter_by(id_player=players[1].id).subquery()
+            q = db.session.query(subq2).join(subq, subq2.c.id_team==subq.c.id_team)
+            # q = db.session.query(TeamPlayer).filter( \
+            #     (TeamPlayer.id_player==player.id) & \
+            #     (TeamPlayer.id_team==subq.c.id_team))
             subq = q.subquery()
     
     print(q.all())
