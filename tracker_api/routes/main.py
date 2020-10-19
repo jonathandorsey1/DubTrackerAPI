@@ -177,7 +177,8 @@ def get_team(players):
             #     (TeamPlayer.id_team==subq.c.id_team))
             subq = q.subquery()
     
-    print(q.all())
+    for team in q.all():
+        print('team:',team)
     record = q.first()
     team = None
     if record is None:
