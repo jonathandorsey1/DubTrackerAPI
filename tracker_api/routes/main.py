@@ -179,7 +179,7 @@ def get_team(players):
     
     for team in q.all():
         print('team id:',team.id_team)
-        print('team attrs:', team.__table__.columns)
+        print('team attrs:', team.items())
         print('team:', team)
     record = q.first()
     team = None
