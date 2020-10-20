@@ -166,9 +166,8 @@ def get_players(team, game):
 def get_team(players):
     # TODO: check if the following queries work
     q = db.session.query(TeamPlayer).filter_by(id_player=players[0].id)
-
+    subq = q.subquery()
     if len(players) > 1:
-        subq = q.subquery()
         for player in players[1:]:
             subq2 = db.session.query(TeamPlayer).filter_by(id_player=player.id).subquery()
             q = db.session.query(subq2).join(subq, subq2.c.id_team==subq.c.id_team)
@@ -176,25 +175,22 @@ def get_team(players):
             #     (TeamPlayer.id_player==player.id) & \
             #     (TeamPlayer.id_team==subq.c.id_team))
             subq = q.subquery()
-    
-    team_id = q.all().team_id
-    print('team_id', team_id)
-    record = q.first()
-    team = None
-    if record is None:
+
+    team = db.session.query(Team).filter((id==subq.c.id_team) & (num_players==len(players)))
+    print('DEBUG: ALL TEAMS:', team.all())
+    team = team.first()
+    if team is None:
         # make new team
         team = make_team(players)
-    else:
-        team = Team.query.filter(id==team_id).first()
-        if len(team.players) != len(players):
-            team = make_team(players)
     for player in team.players:
         print(player.player.username)
     print('team id:',team.id)
     return team
 
 def make_team(players):
-    team = Team()
+    team = Team(
+        num_players=len(players)
+    )
     db.session.add(team)
     for player in players:
         db.session.add(TeamPlayer(
