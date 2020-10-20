@@ -177,17 +177,15 @@ def get_team(players):
             #     (TeamPlayer.id_team==subq.c.id_team))
             subq = q.subquery()
     
-    for team in q.all():
-        print('team id:',team.id_team, team.id_player)
-        print('team attrs:', dir(team))
-        print('team:', team)
+    team_id = q.all().team_id
+    print('team_id', team_id)
     record = q.first()
     team = None
     if record is None:
         # make new team
         team = make_team(players)
     else:
-        team = Team.query.filter_by(id=record.id_team).first()
+        team = Team.query.filter(id==team_id).first()
         if len(team.players) != len(players):
             team = make_team(players)
     for player in team.players:

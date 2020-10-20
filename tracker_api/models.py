@@ -17,6 +17,7 @@ class Game(db.Model):
     
 class Team(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    num_players = db.Column(db.Integer, nullable=False)
     players = db.relationship('TeamPlayer', backref='team', lazy=True)
     games = db.relationship('TeamGame', backref='team', lazy=True)
 
