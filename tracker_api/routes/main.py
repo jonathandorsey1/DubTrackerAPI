@@ -31,7 +31,8 @@ def player_wins(username):
 
     for team in teams:
         wins = TeamGame.query.filter_by(id_team=team.id, placement=1).subquery()
-        player_games = db.session.query(PlayerGame).join(wins, wins.c.id_game==PlayerGame.id_game).all()
+        games = PlayerGame.query.filter_by(id=player.id).subquery()
+        player_games = db.session.query(games).join(wins, wins.c.id_game==games.c.id_game).all()
         for game in player_games:
             stats['wins'] += 1
             stats['kills'] += [game.kills]
