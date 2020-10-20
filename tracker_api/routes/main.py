@@ -178,7 +178,7 @@ def get_team(players):
             subq = q.subquery()
     
     for team in q.all():
-        print('team id:',team.id_team)
+        print('team id:',team.id_team, team.id_player)
         print('team attrs:', team.items())
         print('team:', team)
     record = q.first()
