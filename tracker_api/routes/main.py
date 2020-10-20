@@ -23,21 +23,23 @@ def player_wins(username):
         }
     team_players = player.teams
     teams = [team_player.team for team_player in team_players]
-    wins = 0
-    # subq = db.session.query(Game).filter_by(Game.gamemode.in_([1,2,3,4])).subquery()
+    stats = {'wins': 0,
+            'kills': [],
+            'deaths': [],
+            'damages': []
+            }
+
     for team in teams:
-        # q = db.session.query(TeamGame).filter( \
-        #         (TeamGame.id_team==team.id_team) & \
-        #         (TeamGame.placement==1) & \
-        #         (TeamGame.game_id.in_(subq)) \
-        #         )
-        # wins += len(q.all())
-        wins += len(TeamGame.query.filter_by(id_team=team.id, placement=1).all())
-
-
+        wins = TeamGame.query.filter_by(id_team=team.id, placement=1).subquery()
+        player_games = db.session.query(PlayerGame).join(wins, wins.c.id_game==PlayerGame.id_game)
+        for game in player_games:
+            stats['wins'] += 1
+            stats['kills'] += [game.kills]
+            stats['damage'] += [game.damage]
+            stats['deaths'] += [game.deaths]
     return {
         'status': 'Player found!',
-        'num wins': wins
+        'stats': stats
         }
 
 @main.route('/wins/gamemode/<int:id>', methods=['GET'])
