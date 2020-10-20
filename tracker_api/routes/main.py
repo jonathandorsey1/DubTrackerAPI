@@ -35,7 +35,7 @@ def player_wins(username):
         for game in player_games:
             stats['wins'] += 1
             stats['kills'] += [game.kills]
-            stats['damage'] += [game.damage]
+            stats['damages'] += [game.damage]
             stats['deaths'] += [game.deaths]
     return {
         'status': 'Player found!',
