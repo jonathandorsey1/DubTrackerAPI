@@ -176,7 +176,7 @@ def get_team(players):
             #     (TeamPlayer.id_team==subq.c.id_team))
             subq = q.subquery()
 
-    team = db.session.query(Team).filter((id==subq.c.id_team) & (num_players==len(players)))
+    team = db.session.query(Team).filter((Team.id==subq.c.id_team) & (Team.num_players==len(players)))
     print('DEBUG: ALL TEAMS:', team.all())
     team = team.first()
     if team is None:
