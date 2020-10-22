@@ -5,6 +5,7 @@ from tracker_api.models import *
 from sqlalchemy.orm import aliased
 
 main = Blueprint('main', __name__)
+NUM_PLAYERS = 4
 
 @main.route('/')
 def index():
@@ -13,6 +14,30 @@ def index():
     return {
         'num wins': len(wins)
         }
+
+@main.route('/team')
+def team_wins():
+    players = []
+    for i in range(4):
+        player = request.args.get('p' + str(i), None)
+        if player:
+            _p = Player.query.filter_by(username=player).first()
+            if _p:
+                players.append(_p)
+            else:
+                return {
+                    'status': 'Team not found!'
+                }
+    team = get_team(players)
+    if team is None:
+        return {
+            'status': 'Team not found!'
+        }
+    agg_stats = {player.username:get_player_win_stats(player, [team]) for player in players}
+    return {
+        'status': 'Team found!',
+        'stats': agg_stats
+    }
 
 @main.route('/wins/<username>', methods=['GET'])
 def player_wins(username):
@@ -23,28 +48,31 @@ def player_wins(username):
         }
     team_players = player.teams
     teams = [team_player.team for team_player in team_players]
-    stats = {'wins': 0,
-            'kills': [],
-            'deaths': [],
-            'damages': []
-            }
-
-    for team in teams:
-        print('team:', team)
-        wins = TeamGame.query.filter_by(id_team=team.id, placement=1).subquery()
-        games = PlayerGame.query.filter_by(id_player=player.id).subquery()
-        player_games = db.session.query(games).join(wins, wins.c.id_game==games.c.id_game).all()
-        print('player_games:', player_games)
-        for game in player_games:
-            print(game)
-            stats['wins'] += 1
-            stats['kills'] += [game.kills]
-            stats['damages'] += [game.damage]
-            stats['deaths'] += [game.deaths]
+    stats = get_player_win_stats(player, teams)
     return {
         'status': 'Player found!',
         'stats': stats
         }
+
+# helper function that gets aggregate stats for player player
+# on games played by the teams teams
+def get_player_win_stats(player, teams): 
+    stats = {'wins': 0,
+                'kills': [],
+                'deaths': [],
+                'damages': []
+                }
+
+    for team in teams:
+        wins = TeamGame.query.filter_by(id_team=team.id, placement=1).subquery()
+        games = PlayerGame.query.filter_by(id_player=player.id).subquery()
+        player_games = db.session.query(games).join(wins, wins.c.id_game==games.c.id_game).all()
+        for game in player_games:
+            stats['wins'] += 1
+            stats['kills'] += [game.kills]
+            stats['damages'] += [game.damage]
+            stats['deaths'] += [game.deaths]
+    return stats
 
 @main.route('/wins/gamemode/<int:id>', methods=['GET'])
 def gamemode_wins(id):
@@ -169,7 +197,7 @@ def get_players(team, game):
     db.session.commit()
     return players
 
-def get_team(players):
+def get_team(players, make=True):
     # TODO: check if the following queries work
     q = db.session.query(TeamPlayer).filter_by(id_player=players[0].id)
     subq = q.subquery()
@@ -183,14 +211,12 @@ def get_team(players):
             subq = q.subquery()
 
     team = db.session.query(Team).filter((Team.id==subq.c.id_team) & (Team.num_players==len(players)))
-    print('DEBUG: ALL TEAMS:', team.all())
     team = team.first()
-    if team is None:
+    if team is None and make:
         # make new team
         team = make_team(players)
-    for player in team.players:
-        print(player.player.username)
-    print('team id:',team.id)
+    if team:
+        print('team id:',team.id)
     return team
 
 def make_team(players):
